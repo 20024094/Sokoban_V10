@@ -1,8 +1,15 @@
 package sokoban_v10;
 
 /**
+ * Module: Object Oriented Programming 
+ * Student: Daniel Barbu: 20024094
+ * Application: Sokoban 
+ * Version: 10.0 
+ * Date: 15/05/2024 
+ * File: Game.java
  *
- * @author danie
+ * @author Daniel Barbu
+ * @version 10.0
  */
 
 import java.awt.Color;
@@ -24,6 +31,7 @@ import java.util.HashMap;
 
 public class Game extends JPanel {
 
+    // Constants for layout and collision type constants
     protected final int OFFSET = 16;
     private final int SPACE = 17;
     private final int LEFT_COLLISION = 1;
@@ -32,241 +40,155 @@ public class Game extends JPanel {
     private final int BOTTOM_COLLISION = 4;
 
     private Image backgroundImage;
-    
+
+    // Instance of the Map class to manage game levels
     private Map game;
     protected HashMap<String, Image> imageMap;
-    
-    private ArrayList<MapElement> polymorphicElements;
-    
+
+    // List of all map elements in the game
+    private ArrayList<MapElement> coordElements;
+
+    // Lists for specific types of game elements
     private ArrayList<Wall> wall = new ArrayList<>();
     private ArrayList<Crate> crate = new ArrayList<>();
     private ArrayList<Diamond> diamond = new ArrayList<>();
 
+    // The player object
     private Player player;
+    // Dimensions of the game board
     private int width = 0;
     private int height = 0;
 
     private int currentLevelIndex = 0;
+    // Flag to indicate if the current level is completed
     private boolean complete = false;
 
+    // Constructor to initialize the game
     public Game() {
-        loadImages();
-        game = new Map(this);
+        loadImages(); // Load images for the game elements
+        game = new Map(this); // Create a new Map object
         game.loadLevel(currentLevelIndex);
-        initBoard(); 
-        
-        polymorphicElements = new ArrayList<>();
+        initBoard();
+
+        coordElements = new ArrayList<>();
         // Initialize elements in polymorphic way
-        polymorphicElements.add(new Player(new Coord(1, 1), imageMap));
-        polymorphicElements.add(new Wall(new Coord(2, 2), imageMap));
-        polymorphicElements.add(new Crate(new Coord(3, 3), imageMap));
-        polymorphicElements.add(new Diamond(new Coord(4, 4), imageMap));
+        coordElements.add(new Player(new Coord(1, 1), imageMap));
+        coordElements.add(new Wall(new Coord(2, 2), imageMap));
+        coordElements.add(new Crate(new Coord(3, 3), imageMap));
+        coordElements.add(new Diamond(new Coord(4, 4), imageMap));
     }
-    
+
+    // Method to calculate the size of the game frame
     public Dimension calculateFrameSize() {
         int frameWidth = game.getMaxLevelWidth() + OFFSET * 2;
         int frameHeight = game.getMaxLevelHeight() + OFFSET * 2;
         return new Dimension(frameWidth, frameHeight);
     }
-    
+
+    // Method to print the statuses of all elements
     public void printAllElementStatuses() {
-        for (MapElement element : polymorphicElements) {
+        for (MapElement element : coordElements) {
             element.interact();  // Polymorphic method call
         }
     }
-    
+
+    // Method to load images from files
     private void loadImages() {
-    imageMap = new HashMap<>();
-    try {
-    File pathToFile = new File("src/graphics/Floor.png");
-    imageMap.put("Floor", ImageIO.read(pathToFile));
-    
-    pathToFile = new File("src/graphics/Wall.png");
-    imageMap.put("Wall", ImageIO.read(pathToFile));
-    
-    pathToFile = new File("src/graphics/Diamond.png");
-    imageMap.put("Diamond", ImageIO.read(pathToFile));
-    
-    pathToFile = new File("src/graphics/Crate.png");
-    imageMap.put("Crate", ImageIO.read(pathToFile));
-    
-    pathToFile = new File("src/graphics/WarehouseKeeper.png");
-    imageMap.put("Player", ImageIO.read(pathToFile));
-} catch (IOException e) {
-    e.printStackTrace();
-}
+        imageMap = new HashMap<>();
+        try {
+            File pathToFile = new File("src/graphics/Floor.png");
+            imageMap.put("Floor", ImageIO.read(pathToFile));
 
-}
+            pathToFile = new File("src/graphics/Wall.png");
+            imageMap.put("Wall", ImageIO.read(pathToFile));
 
-    /*private void loadLevel(int levelIndex) {
-        currentLevelIndex = levelIndex; // Set the current level index
-        System.out.println("Current level index set to: " + currentLevelIndex);
-        String level = "";
-        switch (levelIndex) {
-            case 0:
-                level = readLevelFromFile("level1.txt");
-                break;
-            case 1:
-                level = readLevelFromFile("level2.txt");
-                break;
-            case 2:
-                level = readLevelFromFile("level3.txt");
-                break;
-            case 3:
-                level = readLevelFromFile("level4.txt");
-                break;
-            case 4:
-                level = readLevelFromFile("level5.txt");
-                break;
-            default:
-                System.out.println("Invalid level index: " + levelIndex);
-                return;
-        }
+            pathToFile = new File("src/graphics/Diamond.png");
+            imageMap.put("Diamond", ImageIO.read(pathToFile));
 
-        if (level.isEmpty()) {
-            System.out.println("Level data is empty or could not be read for level index: " + levelIndex);
-            return;
-        }
+            pathToFile = new File("src/graphics/Crate.png");
+            imageMap.put("Crate", ImageIO.read(pathToFile));
 
-        System.out.println("Level loaded: \n" + level);
-        initMap(level); // Load the level
-    }*/
-
-    /*private void loadNextLevel() {
-        if (currentLevelIndex + 1 < 5) { // there are 5 levels indexed from 0 to 4
-            System.out.println("Loading level: " + (currentLevelIndex + 1));
-            // loadLevel(currentLevelIndex + 1);
-            gameMap.loadLevel(currentLevelIndex + 1); // Load the first level using Map
-        } else {
-            // Handle the completion of all levels (show message or restart the game)
-            System.out.println("All levels completed. Congratulations!");
-        }
-    }
-
-    private String readLevelFromFile(String filename) {
-        StringBuilder levelStringBuilder = new StringBuilder();
-        InputStream in = getClass().getResourceAsStream("/maps/" + filename);
-
-        if (in == null) {
-            System.out.println("Level file not found: " + filename);
-            return "";
-        }
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                levelStringBuilder.append(line).append("\n");
-            }
+            pathToFile = new File("src/graphics/WarehouseKeeper.png");
+            imageMap.put("Player", ImageIO.read(pathToFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return levelStringBuilder.toString();
-    }*/
 
+    }
+
+    // Method to initialize the game board
     private void initBoard() {
-
-        addKeyListener(new TAdapter());
+        addKeyListener(new TAdapter()); // Add key listener for player control
         setFocusable(true);
-        game.loadLevel(currentLevelIndex);
+        game.loadLevel(currentLevelIndex); // Load the current level
     }
 
-    /*public int getBoardWidth() {
-        return this.width;
-    }
-
-    public int getBoardHeight() {
-        return this.height;
-    }
-
-    public int getMaxLevelWidth() {
-        int maxWidth = 0;
-        for (int i = 1; i <= 5; i++) { // there are 5 levels
-            String level = readLevelFromFile("level" + i + ".txt");
-            String[] lines = level.split("\n");
-            for (String line : lines) {
-                maxWidth = Math.max(maxWidth, line.length());
-            }
-        }
-        return maxWidth * SPACE;
-    }
-
-    public int getMaxLevelHeight() {
-        int maxHeight = 0;
-        for (int i = 1; i <= 5; i++) { // there are 5 levels
-            String level = readLevelFromFile("level" + i + ".txt");
-            String[] lines = level.split("\n");
-            maxHeight = Math.max(maxHeight, lines.length);
-        }
-        int extraSpace = 30;
-        return maxHeight * SPACE + extraSpace;
-    }*/
-
+    // Method to initialize the map with level data
     public void initMap(String level) {
-    System.out.println("Initializing map with level data...");
-    // Clear previous game elements
-    wall.clear();
-    crate.clear();
-    diamond.clear();
-    player = null;
+        System.out.println("Initializing map with level data...");
+        // Clear previous game elements
+        wall.clear();
+        crate.clear();
+        diamond.clear();
+        player = null;
 
-    int x = OFFSET;
-    int y = OFFSET;
+        int x = OFFSET;
+        int y = OFFSET;
 
-    for (int i = 0; i < level.length(); i++) {
-        char item = level.charAt(i);
-        Coord coord = new Coord(x, y); // Create Coord object here
+        for (int i = 0; i < level.length(); i++) {
+            char item = level.charAt(i);
+            Coord coord = new Coord(x, y); // Create Coord object here
 
-        switch (item) {
-            case '\n':
-                y += SPACE;
-                x = OFFSET;
-                if (this.width < x) {
-                    this.width = x;
-                }
-                break;
-            case 'X':
-                wall.add(new Wall(coord, imageMap));
-                x += SPACE;
-                break;
-            case '*':
-                crate.add(new Crate(coord, imageMap));
-                x += SPACE;
-                break;
-            case '.':
-                diamond.add(new Diamond(coord, imageMap));
-                x += SPACE;
-                break;
-            case '@':
-                player = new Player(coord, imageMap);
-                x += SPACE;
-                break;
-            case ' ':
-                x += SPACE;
-                break;
-            default:
-                // Handle unexpected characters or add logging
-                break;
+            switch (item) {
+                case '\n':
+                    y += SPACE;
+                    x = OFFSET;
+                    if (this.width < x) {
+                        this.width = x;
+                    }
+                    break;
+                case 'X':
+                    wall.add(new Wall(coord, imageMap));
+                    x += SPACE;
+                    break;
+                case '*':
+                    crate.add(new Crate(coord, imageMap));
+                    x += SPACE;
+                    break;
+                case '.':
+                    diamond.add(new Diamond(coord, imageMap));
+                    x += SPACE;
+                    break;
+                case '@':
+                    player = new Player(coord, imageMap);
+                    x += SPACE;
+                    break;
+                case ' ':
+                    x += SPACE;
+                    break;
+                default:
+                    // Handle unexpected characters or add logging
+                    break;
+            }
+
+            height = y; // Update the height to the current y position
         }
-
-        height = y; // Update the height to the current y position
     }
-}
 
+    // Method to build the map and render it
     private void buildMap(Graphics g) {
         super.paintComponent(g);
 
         Image floor = imageMap.get("Floor");
-         if (floor == null) {
-    System.out.println("Floor image not found in the map.");
-} else {
+        if (floor == null) {
+            System.out.println("Floor image not found in the map.");
+        } else {
             for (int x = 0; x < getWidth(); x += OFFSET) {
                 for (int y = 0; y < getHeight(); y += OFFSET) {
                     g.drawImage(floor, x, y, this);
                 }
             }
         }
-        
-        
 
         ArrayList<MapElement> mapArray = new ArrayList<>();
 
@@ -296,44 +218,37 @@ public class Game extends JPanel {
         }
     }
 
-    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         buildMap(g);
     }
 
+    // Inner class for handling keyboard input
     protected class TAdapter extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
-
             if (complete) {
-                return;
+                return; // If the level is complete, ignore further input
             }
 
             int key = e.getKeyCode();
 
             switch (key) {
-
                 case KeyEvent.VK_LEFT:
-
-                    if (wallCollision(player,
-                            LEFT_COLLISION)) {
+                    if (wallCollision(player, LEFT_COLLISION)) {
                         return;
                     }
 
                     if (crateCollision(LEFT_COLLISION)) {
                         return;
                     }
-
                     player.move(-SPACE, 0);
 
                     break;
 
                 case KeyEvent.VK_RIGHT:
-
                     if (wallCollision(player, RIGHT_COLLISION)) {
                         return;
                     }
@@ -341,13 +256,11 @@ public class Game extends JPanel {
                     if (crateCollision(RIGHT_COLLISION)) {
                         return;
                     }
-
                     player.move(SPACE, 0);
 
                     break;
 
                 case KeyEvent.VK_UP:
-
                     if (wallCollision(player, TOP_COLLISION)) {
                         return;
                     }
@@ -355,13 +268,11 @@ public class Game extends JPanel {
                     if (crateCollision(TOP_COLLISION)) {
                         return;
                     }
-
                     player.move(0, -SPACE);
 
                     break;
 
                 case KeyEvent.VK_DOWN:
-
                     if (wallCollision(player, BOTTOM_COLLISION)) {
                         return;
                     }
@@ -369,14 +280,12 @@ public class Game extends JPanel {
                     if (crateCollision(BOTTOM_COLLISION)) {
                         return;
                     }
-
                     player.move(0, SPACE);
 
                     break;
 
                 case KeyEvent.VK_R:
-
-                    restartLevel();
+                    restartLevel(); // Restart the current level
 
                     break;
 
@@ -388,18 +297,13 @@ public class Game extends JPanel {
         }
     }
 
+    // Method to check for collisions with walls
     private boolean wallCollision(MapElement elementCollision, int type) {
-
         switch (type) {
-
             case LEFT_COLLISION:
-
                 for (int i = 0; i < wall.size(); i++) {
-
                     Wall wall = this.wall.get(i);
-
                     if (elementCollision.isLeftCollision(wall)) {
-
                         return true;
                     }
                 }
@@ -407,11 +311,8 @@ public class Game extends JPanel {
                 return false;
 
             case RIGHT_COLLISION:
-
                 for (int i = 0; i < wall.size(); i++) {
-
                     Wall wall = this.wall.get(i);
-
                     if (elementCollision.isRightCollision(wall)) {
                         return true;
                     }
@@ -420,13 +321,9 @@ public class Game extends JPanel {
                 return false;
 
             case TOP_COLLISION:
-
                 for (int i = 0; i < wall.size(); i++) {
-
                     Wall wall = this.wall.get(i);
-
                     if (elementCollision.isTopCollision(wall)) {
-
                         return true;
                     }
                 }
@@ -434,13 +331,9 @@ public class Game extends JPanel {
                 return false;
 
             case BOTTOM_COLLISION:
-
                 for (int i = 0; i < wall.size(); i++) {
-
                     Wall wall = this.wall.get(i);
-
                     if (elementCollision.isBottomCollision(wall)) {
-
                         return true;
                     }
                 }
@@ -454,8 +347,8 @@ public class Game extends JPanel {
         return false;
     }
 
+    // Method to check for collisions with crates
     private boolean crateCollision(int type) {
-
         switch (type) {
 
             case LEFT_COLLISION:
@@ -589,6 +482,7 @@ public class Game extends JPanel {
         return false;
     }
 
+    // Method to check if the level is completed
     public void isCompleted() {
         int numCratesOnDiamonds = 0;
 
