@@ -1,8 +1,15 @@
 package sokoban_v10;
 
 /**
+ * Module: Object Oriented Programming 
+ * Student: Daniel Barbu: 20024094
+ * Application: Sokoban 
+ * Version: 10.0 
+ * Date: 14/05/2024 
+ * File: Map.java
  *
- * @author danie
+ * @author Daniel Barbu
+ * @version 10.0
  */
 
 import java.awt.Image;
@@ -13,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 
 public class Map {
+
     private Game game;  // Reference to the Game class
     protected final int OFFSET = 16;
     private final int SPACE = 17;
@@ -20,14 +28,17 @@ public class Map {
     private int width = 0;
     private int height = 0;
 
+    // Constructor to initialize the Map with a reference to the Game
     public Map(Game game) {
         this.game = game;
     }
 
+    // Method to load a specific level based on the level index
     protected void loadLevel(int levelIndex) {
         currentLevelIndex = levelIndex; // Set the current level index
         System.out.println("Current level index set to: " + currentLevelIndex);
         String level = "";
+        // Load level data based on the level index
         switch (levelIndex) {
             case 0:
                 level = readLevelFromFile("level1.txt");
@@ -57,7 +68,8 @@ public class Map {
         System.out.println("Level loaded: \n" + level);
         game.initMap(level); // Load the level
     }
-    
+
+    // Method to load the next level
     protected void loadNextLevel() {
         if (currentLevelIndex + 1 < 5) { // there are 5 levels indexed from 0 to 4
             System.out.println("Loading level: " + (currentLevelIndex + 1));
@@ -69,8 +81,10 @@ public class Map {
         }
     }
 
+    // Private method to read level data from a file
     private String readLevelFromFile(String filename) {
         StringBuilder levelStringBuilder = new StringBuilder();
+        // Load the level file as a resource
         InputStream in = getClass().getResourceAsStream("/maps/" + filename);
 
         if (in == null) {
@@ -78,6 +92,7 @@ public class Map {
             return "";
         }
 
+        // Read the file line by line and build the level string
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -88,15 +103,18 @@ public class Map {
         }
         return levelStringBuilder.toString();
     }
-    
+
+    // Getter for the board width
     public int getBoardWidth() {
         return this.width;
     }
 
+    // Getter for the board height
     public int getBoardHeight() {
         return this.height;
     }
 
+    // Method to get the maximum width of all levels
     public int getMaxLevelWidth() {
         int maxWidth = 0;
         for (int i = 1; i <= 5; i++) { // there are 5 levels
@@ -109,6 +127,7 @@ public class Map {
         return maxWidth * SPACE;
     }
 
+    // Method to get the maximum height of all levels
     public int getMaxLevelHeight() {
         int maxHeight = 0;
         for (int i = 1; i <= 5; i++) { // there are 5 levels
@@ -120,5 +139,3 @@ public class Map {
         return maxHeight * SPACE + extraSpace;
     }
 }
-
-
